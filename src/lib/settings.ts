@@ -11,12 +11,17 @@ export interface Settings {
   targetId: string | null;
   /** Ids of built-in places the user has hidden from the list. */
   hiddenBuiltins: string[];
+  /** Rotate the map so the way you're facing is up, instead of north. */
+  headingUp: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   units: 'metric',
   targetId: null,
-  hiddenBuiltins: []
+  hiddenBuiltins: [],
+  // On by default: a north-up map is hard to relate to what's in front of you,
+  // which is the whole job here. It quietly does nothing without a compass.
+  headingUp: true
 };
 
 export function loadSettings(): Settings {

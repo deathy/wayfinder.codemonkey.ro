@@ -57,24 +57,62 @@ body {
   background: var(--bg-elev);
 }
 
-/* Keep Leaflet's own overlays clear of the drawer. */
-.leaflet-bottom {
+/* ---------- OpenLayers chrome ---------- */
+.ol-viewport {
+  background: var(--bg-elev);
+}
+/* Zoom control to the top right, out from under the compass dial. */
+.ol-zoom {
+  top: 12px;
+  right: 12px;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ol-control button {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.92);
+  color: var(--text);
+  border: 1px solid var(--bg-elev-2);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.ol-control button:hover,
+.ol-control button:focus {
+  background: var(--bg-elev-2);
+  color: var(--text);
+}
+/* Attribution lifted clear of the drawer. */
+.ol-attribution {
   bottom: calc(var(--drawer-h) + 4px);
+  right: 0;
+  max-width: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 6px 0 0 0;
 }
-.leaflet-control-attribution {
-  background: rgba(15, 23, 42, 0.7) !important;
-  color: var(--text-dim) !important;
+.ol-attribution ul {
   font-size: 10px;
+  color: var(--text-dim);
+  text-shadow: none;
 }
-.leaflet-control-attribution a {
-  color: var(--accent) !important;
+.ol-attribution a {
+  color: var(--accent);
 }
-.leaflet-bar a {
-  background: var(--bg-elev) !important;
-  color: var(--text) !important;
-  border-bottom-color: var(--bg-elev-2) !important;
+.ol-attribution button {
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
 }
 
+/* ---------- markers (engine-neutral DOM overlays) ---------- */
+.marker-pin,
+.here-pin {
+  /* Purely informational, and they must never eat a map drag. */
+  pointer-events: none;
+}
 .marker-pin svg {
   display: block;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
@@ -213,8 +251,24 @@ button.round {
   background: var(--bg-elev);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
+button.round.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.north-arrow {
+  width: 22px;
+  height: 22px;
+  /* Follows the damped map bearing, so it can afford to ease. */
+  transition: transform 160ms linear;
+}
+.north-arrow path {
+  fill: var(--danger);
+  stroke: var(--text);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
 
-/* Sits above the drawer and clear of Leaflet's attribution strip. */
+/* Sits above the drawer and clear of the attribution strip. */
 .banner {
   position: absolute;
   left: 12px;

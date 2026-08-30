@@ -29,9 +29,13 @@ Which way is home from here. Which way is Mecca. Which way is the Great Pyramid,
 - **The dial** counter-rotates against your compass heading, so N on screen really
   is north and the blue arrow sits physically over the target. Turn until the arrow
   points straight up and you're facing it — it turns green when you're within 8°.
-- **The map** stays north-up and draws the great-circle path from you to the target.
-  On any long route that line is visibly a curve; a straight line on a Mercator map
-  would be the wrong direction.
+- **The map** rotates so the way you're facing is up, and draws the great-circle
+  path from you to the target. Turn to face the target and the line runs straight up
+  the screen. On any long route that line is visibly a curve; a straight line on a
+  Mercator map would be the wrong direction.
+- **Heading-up or north-up** — the north arrow button in the bottom right shows where
+  north has gone and switches between the two. It's the same button either way, so
+  you can always find north again.
 - **Save where you are** with a label, from the Places tab, so "home" is one tap away.
 
 ### About the compass

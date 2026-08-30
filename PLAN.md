@@ -16,8 +16,10 @@ to Cloudflare.
 |---|---|---|
 | Name | `wayfinder.codemonkey.ro` | Says what it does; matches the `qr.` / `spot.` sibling pattern |
 | Framework | Preact + Vite + TS | Matches the sibling apps; tiny runtime, fast build |
-| Map | Leaflet + raw OSM tiles | Free, keyless, no account; fine for personal scale |
-| Map orientation | North-up, rotating needle | Rotating tiles rotates their labels too; a needle is easier to trust than a map moving under your thumb |
+| Map | OpenLayers + raw OSM tiles | Rotation is a first-class `View` property, not a plugin patch; keeps us on free keyless tiles with no third-party service |
+| Map orientation | Heading-up, toggleable | A north-up map is hard to relate to what's in front of you, which is the app's whole job. North-up stays one tap away |
+| Map engine | Behind a `MapEngine` interface | Nothing outside `src/map/` imports OpenLayers, so swapping to MapLibre is one new file, not a rewrite |
+| Map damping | Own filter, α = 0.08 per frame | The needle's α = 0.25 applied to a whole viewport is nauseating; driven by rAF, not renders, so a steady sensor can't strand it mid-turn |
 | Route line | Sampled great circle | The honest "line of sight". A straight Mercator line points the wrong way over any distance |
 | Earth model | Sphere, R = 6 371 008.8 m | ~0.5% on distance, a fraction of a degree on bearing — far inside magnetometer error, and keeps the maths auditable |
 | Heading | Rotation matrix, not raw `alpha` | Stays correct when the phone is tilted; falls back to the back-facing axis when held upright |
@@ -53,6 +55,33 @@ interface Place {
 - Import is additive and id-keyed, so re-importing the same file is a no-op rather
   than a pile of duplicates.
 
+## The map engine seam
+
+`src/map/types.ts` defines a `MapEngine` interface that speaks only lat/lng and
+degrees. Nothing outside `src/map/` imports OpenLayers — `MapView` drives the
+interface, and `src/map/index.ts` is the single line that picks an implementation.
+
+Markers are DOM elements rather than engine-native styled features, because
+OpenLayers `Overlay` and MapLibre `Marker` both position a DOM node — so the pins,
+their CSS and their animations port across untouched.
+
+**Swapping to MapLibre** means adding `src/map/maplibre.ts` that satisfies
+`MapEngine` and changing which factory `createMapEngine` points at. The reason to
+do it is labels: raster tiles have their text baked in, so it rotates with the map
+and reads sideways when you face south. Only vector tiles keep labels upright.
+Measured costs of that swap: ~+62 KB gzipped over OpenLayers, and a dependency on
+a keyless but donation-funded, no-SLA tile service (OpenFreeMap), where today the
+app talks to nothing but OSM raster tiles.
+
+Measured bundle sizes, for when that trade-off comes up again (gzipped):
+
+| Engine | JS | App total |
+|---|---|---|
+| Leaflet (no rotation) | 42.5 KB | 58 KB |
+| Leaflet + `leaflet-rotate` | 48.4 KB | ~64 KB |
+| **OpenLayers (current)** | **89.4 KB + 1.4 KB CSS** | **107 KB** |
+| MapLibre GL + vector tiles | 142.5 KB + 10.4 KB CSS | ~168 KB |
+
 ## Open questions / known gaps
 
 - **Magnetic vs true north.** Both platform APIs report magnetic. The declination is
@@ -64,6 +93,8 @@ interface Place {
   checking in a landscape browser tab.
 - **Magnetometer calibration.** Android readings drift until the phone is waved in a
   figure-eight. There's a hint in Settings, no detection.
+- **Rotated labels.** The heading-up map rotates raster tiles, text and all. Living
+  with it for now; see the engine seam above for the fix and its price.
 
 ## Roadmap
 
@@ -76,8 +107,10 @@ interface Place {
 - Save/edit/delete your own places; hide built-ins; units; JSON export/import.
 - PWA, Cloudflare Worker config, sensor `Permissions-Policy` header.
 
-### Phase 2 — after the first phone test
+### Phase 2 — in progress
 
+- **Heading-up map** — done. OpenLayers behind the `MapEngine` seam, with its own
+  damping filter and a north-arrow button that doubles as a rotation indicator.
 - **True north**: vendor a World Magnetic Model implementation, correct the heading,
   and show which reference is live.
 - **Target by pin or paste**: long-press the map to point at an arbitrary spot; paste

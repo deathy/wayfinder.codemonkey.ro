@@ -15,6 +15,7 @@ import {
   watchHeading
 } from './lib/heading';
 import { BUILTIN_PLACES } from './lib/places';
+import { useMapBearing } from './lib/useMapBearing';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from './lib/settings';
 import type { GpsFix, Heading, Place } from './lib/types';
 
@@ -107,6 +108,9 @@ export function App() {
     [location, target]
   );
 
+  // Heavily damped, so magnetometer jitter doesn't make the viewport seasick.
+  const mapBearing = useMapBearing(heading?.degrees ?? null, settings.headingUp);
+
   const targetDistance = location && target ? distance(location, target) : null;
   const targetBearing = location && target ? initialBearing(location, target) : null;
 
@@ -160,12 +164,13 @@ export function App() {
   return (
     <div class="app">
       <main class="content">
-        {/* The map stays mounted across tabs so Leaflet keeps its state. */}
+        {/* The map stays mounted across tabs so it keeps its view and tiles. */}
         <div class="map-wrap" hidden={view !== 'map'}>
           <MapView
             location={location}
             target={target}
             path={path}
+            bearing={mapBearing}
             active={view === 'map'}
             fitRequest={fitRequest}
           />
@@ -180,6 +185,18 @@ export function App() {
           </div>
 
           <div class="map-buttons">
+            {/* Doubles as a rotation indicator: the arrow shows where north has
+                gone, and tapping it puts the map back north-up. */}
+            <button
+              class={`round${settings.headingUp ? ' active' : ''}`}
+              title={settings.headingUp ? 'Map follows your heading' : 'Map is north-up'}
+              aria-pressed={settings.headingUp}
+              onClick={() => updateSettings({ headingUp: !settings.headingUp })}
+            >
+              <svg viewBox="0 0 24 24" class="north-arrow" style={{ transform: `rotate(${-mapBearing}deg)` }}>
+                <path d="M12 3 L16.5 20 L12 16.5 L7.5 20 Z" />
+              </svg>
+            </button>
             <button
               class="round"
               title="Frame the route"

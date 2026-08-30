@@ -54,7 +54,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,wasm}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/i,
+            // OSM serves tiles from the bare host now; the older a/b/c
+            // subdomains stay matched so previously cached tiles still hit.
+            urlPattern: /^https:\/\/([abc]\.)?tile\.openstreetmap\.org\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'osm-tiles',

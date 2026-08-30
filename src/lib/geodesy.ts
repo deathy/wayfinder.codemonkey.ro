@@ -49,7 +49,8 @@ export function initialBearing(a: LatLng, b: LatLng): number {
  *
  * Longitudes are returned unwrapped (they may run past ±180) so the polyline
  * stays continuous across the antimeridian instead of snapping back across the
- * whole map. Leaflet handles out-of-range longitudes fine.
+ * whole map. Map engines project out-of-range longitudes linearly, which is
+ * exactly what keeps the line continuous.
  */
 export function greatCirclePath(a: LatLng, b: LatLng, segments = 128): LatLng[] {
   const lat1 = toRad(a.lat);
