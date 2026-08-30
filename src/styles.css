@@ -1,0 +1,572 @@
+:root {
+  --bg: #0f172a;
+  --bg-elev: #1e293b;
+  --bg-elev-2: #334155;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #38bdf8;
+  --accent-ink: #0f172a;
+  --danger: #f87171;
+  --ok: #4ade80;
+  --radius: 12px;
+  --tabbar-h: 60px;
+  --drawer-h: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  height: 100%;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.content {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- map ---------- */
+.map-wrap {
+  position: absolute;
+  inset: 0;
+}
+.map {
+  height: 100%;
+  width: 100%;
+  background: var(--bg-elev);
+}
+
+/* Keep Leaflet's own overlays clear of the drawer. */
+.leaflet-bottom {
+  bottom: calc(var(--drawer-h) + 4px);
+}
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.7) !important;
+  color: var(--text-dim) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--accent) !important;
+}
+.leaflet-bar a {
+  background: var(--bg-elev) !important;
+  color: var(--text) !important;
+  border-bottom-color: var(--bg-elev-2) !important;
+}
+
+.marker-pin svg {
+  display: block;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
+.marker-target {
+  color: var(--accent);
+}
+
+.here-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* ---------- compass HUD ---------- */
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.compass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.compass-dial {
+  width: 164px;
+  height: 164px;
+  /* No CSS transition on the rotations: a reading crossing 359°→1° would
+     animate the long way round. Smoothing happens on the data instead. */
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+}
+
+.dial-face {
+  fill: rgba(15, 23, 42, 0.78);
+}
+.dial-ring {
+  fill: none;
+  stroke: rgba(226, 232, 240, 0.22);
+  stroke-width: 2;
+}
+.tick {
+  stroke: rgba(226, 232, 240, 0.35);
+  stroke-width: 2;
+}
+.tick-cardinal {
+  stroke: rgba(226, 232, 240, 0.65);
+  stroke-width: 3;
+}
+.dial-label {
+  fill: var(--text-dim);
+  font-size: 17px;
+  font-weight: 700;
+}
+.dial-north {
+  fill: var(--danger);
+}
+.needle-head {
+  fill: var(--accent);
+}
+.needle-tail {
+  fill: rgba(226, 232, 240, 0.3);
+}
+.dial-hub {
+  fill: var(--bg);
+  stroke: rgba(226, 232, 240, 0.5);
+  stroke-width: 2;
+}
+
+/* No compass reading: the rose is decorative north, so play it down. */
+.compass-static .dial-label,
+.compass-static .tick-cardinal {
+  opacity: 0.6;
+}
+/* Facing the target. */
+.compass-on .needle-head {
+  fill: var(--ok);
+}
+
+.compass-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid var(--bg-elev-2);
+  border-radius: 999px;
+  padding: 5px 14px;
+}
+.readout-distance {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.readout-bearing {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- map overlay controls ---------- */
+.map-buttons {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--drawer-h) + 12px);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+button.round {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.1rem;
+  background: var(--bg-elev);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Sits above the drawer and clear of Leaflet's attribution strip. */
+.banner {
+  position: absolute;
+  left: 12px;
+  right: 68px;
+  bottom: calc(var(--drawer-h) + 30px);
+  z-index: 999;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--bg-elev-2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+  text-align: left;
+}
+.banner-dim {
+  color: var(--text-dim);
+}
+.banner-action {
+  color: var(--accent);
+  font-weight: 600;
+  width: auto;
+  justify-content: flex-start;
+}
+
+/* ---------- buttons ---------- */
+button,
+.btn {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--bg-elev-2);
+  background: var(--bg-elev);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+button.danger {
+  color: var(--danger);
+  border-color: #7f1d1d;
+}
+
+/* ---------- bottom drawer ---------- */
+.drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1100;
+  background: var(--bg-elev);
+  border-top: 1px solid var(--bg-elev-2);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.drawer-handle {
+  width: 100%;
+  height: var(--drawer-h);
+  border: none;
+  background: none;
+  border-radius: 16px 16px 0 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  position: relative;
+  text-align: left;
+}
+.handle-grip {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-elev-2);
+}
+.handle-text {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 6px;
+}
+.handle-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.handle-distance {
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.handle-chevron {
+  color: var(--text-dim);
+  padding-top: 6px;
+}
+
+.place-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 8px;
+  max-height: 46dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.place-row {
+  width: 100%;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.place-row.active {
+  background: var(--bg-elev-2);
+}
+.place-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.place-tag {
+  margin-left: 8px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  border: 1px solid var(--bg-elev-2);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.place-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+.place-distance {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.place-bearing,
+.place-dim {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+/* ---------- scrolling tabs (Places / Settings) ---------- */
+.scroll-view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 16px 16px 24px;
+}
+.scroll-view section {
+  margin-bottom: 28px;
+}
+.scroll-view h2 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin: 0 0 10px;
+}
+.hint {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 10px 0;
+}
+.hint.status {
+  color: var(--ok);
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.manage-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.manage-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--bg-elev-2);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.manage-list li.muted {
+  opacity: 0.5;
+}
+.manage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.manage-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coords {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.manage-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.manage-actions button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+.facts dt {
+  color: var(--text-dim);
+}
+.facts dd {
+  margin: 0;
+}
+
+/* ---------- modal sheet ---------- */
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.sheet {
+  width: 100%;
+  max-width: 640px;
+  background: var(--bg-elev);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sheet h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.field > span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.field input {
+  font: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--bg-elev-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+}
+.field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+.field input.invalid {
+  border-color: var(--danger);
+}
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+.sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ---------- tab bar ---------- */
+.tabbar {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--bg-elev-2);
+  background: var(--bg);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar button {
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text-dim);
+  flex-direction: column;
+  gap: 2px;
+  height: var(--tabbar-h);
+  font-size: 0.7rem;
+}
+.tabbar button.active {
+  color: var(--accent);
+}
+.tab-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}

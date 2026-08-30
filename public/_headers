@@ -1,0 +1,8 @@
+# Cloudflare static-asset headers. https://developers.cloudflare.com/pages/configuration/headers/
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  # The motion sensors are what make the compass work — without them Chrome
+  # silently withholds DeviceOrientation events. Everything else stays off.
+  Permissions-Policy: geolocation=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self), camera=(), microphone=(), interest-cohort=()
