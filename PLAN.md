@@ -26,6 +26,7 @@ to Cloudflare.
 | Smoothing | Circular EMA on the unit vector | Averaging angles makes 359° and 1° average to 180°; averaging vectors doesn't |
 | City search | Bundled GeoNames `cities15000` | ~34k cities, searched on-device. No geocoder means no query ever leaves the browser |
 | City encoding | Millidegree deltas, country-grouped | Absolute coordinates are high-entropy and compress badly: 367 KB gzipped instead of 626 KB |
+| Data asset | `src/data/`, imported with `?url` | Vite content-hashes it, so it can be cached immutably and a regenerated index arrives under a new name. `public/` is copied verbatim and would need a hand-bumped version |
 | Storage | IndexedDB (`idb`) + localStorage | Places in IDB (room to grow), preferences in localStorage |
 | PWA | `vite-plugin-pwa` from the start | Installable, offline shell + runtime-cached tiles |
 | Deploy | Cloudflare static-assets Worker | Same as sibling projects; SPA fallback |
@@ -136,7 +137,9 @@ rows (the dump has grown), which at 4 decimals and full population integers came
   magnetometer contributes.
 
 Result: **367 KB gzipped / 322 KB brotli**, fetched on first search and then kept by
-the service worker. Base36 deltas were measured too and saved ~1%, not worth the loss
+the service worker. It lives in `src/data/` and is imported with `?url`, so the build
+emits it as `assets/cities-<hash>.tsv`; `public/_headers` caches everything under
+`/assets/` immutably for a year, which is only safe *because* the names are hashed. Base36 deltas were measured too and saved ~1%, not worth the loss
 of a human-readable file.
 
 Search folds diacritics on both sides, so "timisoara" finds "Timişoara", and falls back

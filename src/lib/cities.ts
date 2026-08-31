@@ -6,6 +6,11 @@
 // that file. Coordinates arrive as millidegree deltas from the previous row
 // within a country group, which is what keeps a 34k-row index down to ~370 KB
 // gzipped instead of ~630 KB.
+//
+// The URL below is a build-time constant pointing at a content-hashed asset, so
+// the file can be cached immutably and a regenerated index simply arrives under
+// a new name — there's no version number to remember to bump.
+import DATA_URL from '../data/cities.tsv?url';
 
 export interface City {
   name: string;
@@ -96,8 +101,6 @@ export function parseCityIndex(text: string): CityIndex {
 
   return { cities, countries };
 }
-
-const DATA_URL = '/data/cities-v1.tsv';
 
 let pending: Promise<CityIndex> | null = null;
 

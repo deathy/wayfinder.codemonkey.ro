@@ -1,6 +1,6 @@
 // Builds the bundled city index from GeoNames.
 //
-// Build-time only; the generated file in public/data/ is committed, so a normal
+// Build-time only; the generated file in src/data/ is committed, so a normal
 // `npm run build` needs no network. Regenerate with `npm run cities` when you
 // want fresher data (GeoNames updates daily; this data barely moves).
 //
@@ -16,9 +16,11 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data');
-// Versioned filename so a format change can't be served from a stale cache.
-const OUT_FILE = 'cities-v1.tsv';
+// Lives under src/ rather than public/ so Vite treats it as an asset and
+// content-hashes the emitted filename. public/ is copied verbatim, which is
+// why this used to need a hand-maintained version number in the name.
+const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'data');
+const OUT_FILE = 'cities.tsv';
 
 const CITIES_URL = 'https://download.geonames.org/export/dump/cities15000.zip';
 const COUNTRIES_URL = 'https://download.geonames.org/export/dump/countryInfo.txt';
@@ -194,4 +196,4 @@ writeFileSync(join(OUT_DIR, OUT_FILE), out, 'utf8');
 const bytes = Buffer.byteLength(out, 'utf8');
 console.log(`  ${parsed.length} cities across ${byCountry.size} countries`);
 if (skipped) console.log(`  skipped ${skipped} malformed rows`);
-console.log(`  wrote public/data/${OUT_FILE} — ${(bytes / 1024 / 1024).toFixed(2)} MB raw`);
+console.log(`  wrote src/data/${OUT_FILE} — ${(bytes / 1024 / 1024).toFixed(2)} MB raw`);

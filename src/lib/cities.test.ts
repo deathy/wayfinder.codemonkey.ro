@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 // Vite inlines the committed data file, so the test needs no filesystem access
 // and no Node type definitions.
-import citiesData from '../../public/data/cities-v1.tsv?raw';
+import citiesData from '../data/cities.tsv?raw';
 import {
   cityLabel,
   cityPlaceId,

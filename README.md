@@ -99,8 +99,10 @@ Map tiles © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 
 City data from [GeoNames](https://www.geonames.org/), used under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The bundled index is built
-from the `cities15000` dump by [`scripts/build-cities.mjs`](scripts/build-cities.mjs);
-regenerate it with `npm run cities`. Note that GeoNames' data licence is separate from
+from the `cities15000` dump by [`scripts/build-cities.mjs`](scripts/build-cities.mjs)
+into `src/data/cities.tsv`, which is committed so a normal build needs no network;
+regenerate it with `npm run cities`. The build emits it as a content-hashed asset, so
+regenerating it invalidates caches on its own. Note that GeoNames' data licence is separate from
 this repo's Apache-2.0 code licence.
 
 ## License

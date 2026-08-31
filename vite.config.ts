@@ -56,7 +56,8 @@ export default defineConfig({
           {
             // The city index: fetched only when search is first opened, then
             // kept, so it works offline afterwards. Deliberately not precached.
-            urlPattern: /\/data\/cities-v\d+\.tsv$/,
+            // Content-hashed by the asset pipeline, hence the loose name match.
+            urlPattern: /\/assets\/cities-[\w-]+\.tsv$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'city-index',
