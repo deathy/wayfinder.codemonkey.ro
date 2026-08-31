@@ -146,8 +146,23 @@ export function SettingsView({
         <h2>About</h2>
         <p class="hint">
           Wayfinder points you at a place — bearing, distance, and the real great-circle line over
-          the ground. No backend, no accounts, no analytics. The only network traffic is map tiles
-          from OpenStreetMap.
+          the ground. No backend, no accounts, no analytics. The only things it ever fetches are
+          map tiles and the city list, and searching that list happens entirely on your device.
+        </p>
+        <p class="hint">
+          Map tiles ©{' '}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
+            OpenStreetMap
+          </a>{' '}
+          contributors. City data from{' '}
+          <a href="https://www.geonames.org/" target="_blank" rel="noreferrer">
+            GeoNames
+          </a>
+          , used under{' '}
+          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
+            CC BY 4.0
+          </a>
+          .
         </p>
         <dl class="facts">
           <dt>Build</dt>

@@ -32,7 +32,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "cities": "node scripts/build-cities.mjs"
   },
   "dependencies": {
     "idb": "8.0.3",

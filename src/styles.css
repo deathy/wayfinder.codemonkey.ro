@@ -624,3 +624,80 @@ button.danger {
   font-size: 1.15rem;
   line-height: 1;
 }
+
+/* ---------- city search ---------- */
+.city-sheet {
+  max-height: 86dvh;
+}
+.city-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.city-head h2 {
+  margin: 0;
+}
+.city-head button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.hint.error {
+  color: var(--danger);
+}
+
+.city-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.city-row {
+  width: 100%;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.city-row:active {
+  background: var(--bg-elev-2);
+}
+.city-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.city-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.city-country {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.city-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+.city-distance {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.city-pop {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}

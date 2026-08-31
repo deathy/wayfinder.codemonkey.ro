@@ -9,6 +9,7 @@ interface Props {
   hiddenBuiltins: string[];
   location: GpsFix | null;
   onSave: (place: PlaceInput) => void;
+  onFindCity: () => void;
   onDelete: (id: string) => void;
   onToggleBuiltin: (id: string) => void;
 }
@@ -19,6 +20,7 @@ export function PlacesView({
   hiddenBuiltins,
   location,
   onSave,
+  onFindCity,
   onDelete,
   onToggleBuiltin
 }: Props) {
@@ -52,6 +54,7 @@ export function PlacesView({
           <button class="primary" onClick={addHere} disabled={!location}>
             + Save where I am
           </button>
+          <button onClick={onFindCity}>+ Find a city</button>
           <button onClick={addManual}>+ By coordinates</button>
         </div>
         {!location && <p class="hint">Waiting for a GPS fix before "save where I am" works.</p>}

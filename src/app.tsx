@@ -3,6 +3,7 @@ import { Compass } from './components/Compass';
 import { MapView } from './components/MapView';
 import { PlaceDrawer, type PlaceEntry } from './components/PlaceDrawer';
 import { PlacesView } from './components/PlacesView';
+import { CitySearch } from './components/CitySearch';
 import type { PlaceInput } from './components/PlaceForm';
 import { SettingsView } from './components/SettingsView';
 import { clearPlaces, deletePlace, getSavedPlaces, putPlace } from './lib/db';
@@ -14,6 +15,7 @@ import {
   requestCompassPermission,
   watchHeading
 } from './lib/heading';
+import { cityPlaceId, type City } from './lib/cities';
 import { BUILTIN_PLACES } from './lib/places';
 import { useMapBearing } from './lib/useMapBearing';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from './lib/settings';
@@ -30,6 +32,7 @@ export function App() {
   const [sensorHeading, setSensorHeading] = useState<Heading | null>(null);
   const [compassAsked, setCompassAsked] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [citySearchOpen, setCitySearchOpen] = useState(false);
   // Bumped to ask the map to frame the whole route; a counter rather than a
   // boolean so repeated taps each trigger a fresh fit.
   const [fitRequest, setFitRequest] = useState(0);
@@ -126,6 +129,29 @@ export function App() {
       updatedAt: now
     });
     setSaved(await getSavedPlaces());
+  }
+
+  // Picking a city is meant to be the fast path: save it, point at it, and get
+  // back to the map in one tap. The id is derived from the city, so picking the
+  // same one twice updates that place instead of duplicating it.
+  async function onPickCity(city: City, label: string) {
+    const now = Date.now();
+    const id = cityPlaceId(city);
+    const existing = saved.find((p) => p.id === id);
+    await putPlace({
+      id,
+      label,
+      lat: city.lat,
+      lng: city.lng,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now
+    });
+    setSaved(await getSavedPlaces());
+    updateSettings({ targetId: id });
+    setCitySearchOpen(false);
+    setDrawerOpen(false);
+    setFitRequest((n) => n + 1);
+    setView('map');
   }
 
   async function onDeletePlace(id: string) {
@@ -233,6 +259,7 @@ export function App() {
             hiddenBuiltins={settings.hiddenBuiltins}
             location={location}
             onSave={onSavePlace}
+            onFindCity={() => setCitySearchOpen(true)}
             onDelete={onDeletePlace}
             onToggleBuiltin={onToggleBuiltin}
           />
@@ -251,6 +278,15 @@ export function App() {
           />
         )}
       </main>
+
+      {citySearchOpen && (
+        <CitySearch
+          location={location}
+          units={units}
+          onPick={onPickCity}
+          onCancel={() => setCitySearchOpen(false)}
+        />
+      )}
 
       <nav class="tabbar">
         <button class={view === 'map' ? 'active' : ''} onClick={() => setView('map')}>

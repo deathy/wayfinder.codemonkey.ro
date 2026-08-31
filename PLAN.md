@@ -24,6 +24,8 @@ to Cloudflare.
 | Earth model | Sphere, R = 6 371 008.8 m | ~0.5% on distance, a fraction of a degree on bearing — far inside magnetometer error, and keeps the maths auditable |
 | Heading | Rotation matrix, not raw `alpha` | Stays correct when the phone is tilted; falls back to the back-facing axis when held upright |
 | Smoothing | Circular EMA on the unit vector | Averaging angles makes 359° and 1° average to 180°; averaging vectors doesn't |
+| City search | Bundled GeoNames `cities15000` | ~34k cities, searched on-device. No geocoder means no query ever leaves the browser |
+| City encoding | Millidegree deltas, country-grouped | Absolute coordinates are high-entropy and compress badly: 367 KB gzipped instead of 626 KB |
 | Storage | IndexedDB (`idb`) + localStorage | Places in IDB (room to grow), preferences in localStorage |
 | PWA | `vite-plugin-pwa` from the start | Installable, offline shell + runtime-cached tiles |
 | Deploy | Cloudflare static-assets Worker | Same as sibling projects; SPA fallback |
@@ -121,12 +123,34 @@ Measured bundle sizes, for when that trade-off comes up again (gzipped):
 - Compass calibration detection and a clearer "your compass is lying" state.
 - Reorder places; colour/icon per place.
 
-### Phase 3 — city search
+### Phase 3 — city search — done
 
-**Chosen: one bundled global file.** GeoNames `cities15000` (~26k cities), stripped to
-`name, country, lat, lng, pop` with coordinates at 4 decimals, ≈1 MB raw / ~300 KB
-gzipped. Lazy-loaded on first search, then service-worker cached. Fully offline, no
-third-party lookups, one build script.
+**One bundled global file**, as chosen. GeoNames `cities15000` turned out to be 34,127
+rows (the dump has grown), which at 4 decimals and full population integers came to
+626 KB gzipped — double the estimate. Encoding fixed that:
+
+- Coordinates as **millidegree deltas** from the previous row, grouped by country and
+  ordered by latitude within a group, so neighbouring rows differ by small numbers.
+- **Population in thousands**, since it's only used for ranking and a label.
+- 3 decimals (~110 m). At 20 km that's 0.3° of bearing error, far inside what the
+  magnetometer contributes.
+
+Result: **367 KB gzipped / 322 KB brotli**, fetched on first search and then kept by
+the service worker. Base36 deltas were measured too and saved ~1%, not worth the loss
+of a human-readable file.
+
+Search folds diacritics on both sides, so "timisoara" finds "Timişoara", and falls back
+to GeoNames' ASCII transliteration for letters that don't decompose (ø, ł, đ). Ranking
+is prefix > word-start > substring, then population — so "london" gives the British one
+and "rome" beats "Romeoville".
+
+**Known gap: English exonyms.** The index carries each city's GeoNames primary name,
+which is usually the English one (Munich, Rome, Vienna, Prague, Warsaw all present) but
+not always — Cologne is "Köln" and Mecca is "Makkah". The dump's `alternatenames`
+column was measured as a fix and rejected: it added 651 KB raw and its first entries
+are mostly noise ("Köln → Augusta Ubiorum, CGN, Cologna"), not the English name. The
+real fix would be filtering `alternateNames.txt` to `isPreferredName` + `lang=en`, which
+means processing a ~400 MB file in the build.
 
 Rejected alternatives, recorded so we don't re-litigate:
 

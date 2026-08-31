@@ -1,0 +1,6 @@
+# Keep line endings stable everywhere. The generated city index in particular is
+# parsed by splitting on \n, and a CRLF checkout would leave a stray \r on every
+# row (and add ~34 KB). src/lib/cities.ts tolerates it anyway, but this stops the
+# working copy and CI from disagreeing in the first place.
+* text=auto eol=lf
+*.png binary

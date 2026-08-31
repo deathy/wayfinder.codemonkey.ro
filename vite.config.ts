@@ -54,6 +54,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,wasm}'],
         runtimeCaching: [
           {
+            // The city index: fetched only when search is first opened, then
+            // kept, so it works offline afterwards. Deliberately not precached.
+            urlPattern: /\/data\/cities-v\d+\.tsv$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'city-index',
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] }
+            }
+          },
+          {
             // OSM serves tiles from the bare host now; the older a/b/c
             // subdomains stay matched so previously cached tiles still hit.
             urlPattern: /^https:\/\/([abc]\.)?tile\.openstreetmap\.org\/.*/i,

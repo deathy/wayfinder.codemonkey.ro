@@ -37,6 +37,10 @@ Which way is home from here. Which way is Mecca. Which way is the Great Pyramid,
   north has gone and switches between the two. It's the same button either way, so
   you can always find north again.
 - **Save where you are** with a label, from the Places tab, so "home" is one tap away.
+- **Find a city** — search ~34,000 cities worldwide by name. Accents are optional
+  ("timisoara" finds "Timişoara"), results rank by population and show how far away
+  they are, and picking one saves it and points at it in a single tap. The list is
+  bundled with the app and searched entirely on your device — nothing is sent anywhere.
 
 ### About the compass
 
@@ -92,6 +96,12 @@ orientation events and the compass just never appears.
 ## Attribution
 
 Map tiles © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+
+City data from [GeoNames](https://www.geonames.org/), used under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The bundled index is built
+from the `cities15000` dump by [`scripts/build-cities.mjs`](scripts/build-cities.mjs);
+regenerate it with `npm run cities`. Note that GeoNames' data licence is separate from
+this repo's Apache-2.0 code licence.
 
 ## License
 
