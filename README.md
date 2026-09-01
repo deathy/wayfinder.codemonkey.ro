@@ -62,7 +62,32 @@ Readings are smoothed with a circular filter so the needle doesn't twitch.
 
 See [PLAN.md](PLAN.md) for the reasoning behind these choices and what's next.
 
+## Known limitations
+
+Worth knowing before you rely on it:
+
+- **Map labels rotate with the map.** In heading-up mode the tiles turn, and raster
+  tiles have their text baked in — so street names read sideways, or upside down when
+  you're facing south. Only vector tiles fix this; see
+  [PLAN.md](PLAN.md#the-map-engine-seam) for the trade-off and its price.
+- **Headings are magnetic, not true north.** Both browser orientation APIs report
+  magnetic north, and the local declination isn't corrected yet — a few degrees in most
+  of Europe, more elsewhere. The app tells you which reference it's using rather than
+  pretending. Correcting it is on the roadmap.
+- **Your compass is probably worse than you think.** Phone magnetometers drift, and
+  metal, magnets and phone cases all pull them around. If the needle wanders, wave the
+  phone in a figure-eight.
+- **City search uses each city's GeoNames primary name.** That's usually the English one
+  (Munich, Rome, Prague, Warsaw), but not always: Cologne is "Köln" and Mecca is
+  "Makkah". Accents are optional either way.
+- **Portrait only.** The PWA manifest locks orientation, because the compass maths
+  assumes screen-up is phone-up.
+- **A great circle is not a route.** The line is the shortest path over the ground, not
+  a road, a flight path, or anything you can walk.
+
 ## Develop
+
+Node 22+ (see [`.nvmrc`](.nvmrc)).
 
 ```bash
 npm install
